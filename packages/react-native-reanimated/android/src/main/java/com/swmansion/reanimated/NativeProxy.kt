@@ -13,6 +13,7 @@ import com.facebook.react.common.annotations.FrameworkAPI
 import com.facebook.react.fabric.FabricUIManager
 import com.facebook.react.turbomodule.core.CallInvokerHolderImpl
 import com.facebook.react.uimanager.IllegalViewOperationException
+import com.facebook.react.uimanager.PixelUtil
 import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.common.UIManagerType
 import com.facebook.soloader.SoLoader
@@ -201,6 +202,26 @@ open class NativeProxy {
                     "/guides/troubleshooting#mismatch-between-java-code-version-and-c-code-version for more information.",
             )
         }
+    }
+
+    @DoNotStrip
+    fun obtainMountedViewProps(tag: Int): FloatArray? {
+        if (!UiThreadUtil.isOnUiThread()) {
+            return null
+        }
+        val view =
+            try {
+                mFabricUIManager.resolveView(tag)
+            } catch (e: IllegalViewOperationException) {
+                null
+            } ?: return null
+        return floatArrayOf(
+            PixelUtil.toDIPFromPixel(view.left.toFloat()),
+            PixelUtil.toDIPFromPixel(view.top.toFloat()),
+            PixelUtil.toDIPFromPixel(view.width.toFloat()),
+            PixelUtil.toDIPFromPixel(view.height.toFloat()),
+            view.alpha,
+        )
     }
 
     @DoNotStrip
